@@ -28,7 +28,6 @@ def all_matchings(adj, edges, matchings, match):
                 yield m
 
         # do NOT add (i,j) to the matching
-        # !!!!! double check if copies would be necessary
         if len(edges) > 0:
             for m in all_matchings(adj, edges, matchings, match):
                 yield m
@@ -66,11 +65,7 @@ def to_str(edges):
 
 
 if __name__ == "__main__":
-    # print("usage: python %s filename.input[.gz]" % sys.argv[0])
-    # exit(-1)
-    # adj = {1:[2,4], 2:[1,3], 3:[2,4], 4:[1,3]}
-    # adj = {1:[2,5,6], 2:[1,3,5], 3:[2,4,5], 4:[3,5], 5:[1,2,3,4], 6:[1]}
-    # adj = {1:set([2,3,4]), 2:set([1]), 3:set([1]), 4:set([1])}
+    print("sample usage")
     adj = {1:set([2,3,4,5]), 2:set([1,3]), 3:set([1,2]), 4:set([1]), 5:set([1])}
     edges = edges_from_adj(adj)
     print("adj", adj)

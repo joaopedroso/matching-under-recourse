@@ -134,7 +134,7 @@ def __solve(adj, p, resid, N):
             if LOG: print(ind+"matching:", to_str(mi), "expectation", m_sol.expect)
         if max_val > 0:
             total_val += max_val
-            total_sol.append(solution) # !!!!! to be implemented !!!!!
+            total_sol.append(solution)
 
     return total_val, total_sol
 
@@ -159,23 +159,18 @@ def solve(adj, p, resid, N, cpulim, init=True):
 
 
 if __name__ == "__main__":
-    # # adj = {1:set([2,3,4]), 2:set([1]), 3:set([1]), 4:set([1])}
-    # # adj = {1:set([2,3,4,5]), 2:set([1,3]), 3:set([1,2]), 4:set([1]), 5:set([1])}
     # adj = {1:{2,4}, 2:{1,3}, 3:{2,4}, 4:{1,3}}   # C4
     adj = {1:{2,3,4}, 2:{1,3,4}, 3:{1,2,4}, 4:{1,2,3}}   #K4
     edges = edges_from_adj(adj)
     p = {}
-    P = 0.5 # float(sys.argv[1])
-    N = 100 # int(sys.argv[2])
+    P = 0.5
+    N = 100
     for (i,j) in edges:
         p[frozenset({i,j})] = P
-    # # print("usage:")
-    # # exit(-1)
 
-
+    print("sample usage:")
     resid = deepcopy(adj)
     E,sol,ncache = solve(adj=adj, p=p, resid=resid, N=N, cpulim=5)
-    # !!!!! to be implemented print("solution:",sol)
     print("expectation:", E)
     print("cache size:", ncache)
     print("solution:")

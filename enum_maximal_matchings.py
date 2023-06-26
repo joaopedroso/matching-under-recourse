@@ -87,8 +87,7 @@ def all_matchings(adj, edges, matchings, match, resid):
                 all_matchings(adj, e_add, matchings, m_add, r_add)
         
         # do NOT add (i,j) to the matching; remove only (i,j) from resid
-        # !!!!! double check if copies are necessary
-        if len(edges) > 0:   # this implies e_add being true!!!!!
+        if len(edges) > 0:   # this implies e_add being true (!!!)
             r_out = resid
             r_out.del_edge_not_in_matching(edge)
             if r_out.may_be_maximal():
