@@ -9,3 +9,4 @@ __pychache__/*
 .ipynb_checkpoints/*
 *.ipynb
 *.pdf
+scratch*.py

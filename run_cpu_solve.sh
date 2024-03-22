@@ -18,7 +18,7 @@ for N in 0 1 2 3; do
         for r in `seq -f "%02g" 1 50`; do
             inst="DATA/small/${sz}_${r}.input.gz"
             echo -n -e "$inst\t$N\t"
-            $PYTHON cpu_kep.py $inst $N 3600 | tail -1
+            $PYTHON cpu_solve.py $inst $N 3600 | tail -1
         done
     done
 done
