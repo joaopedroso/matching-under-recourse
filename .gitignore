@@ -1,0 +1,11 @@
+HG
+RESULTS*
+DATA
+.idea
+.git
+*.pyc
+*~
+__pychache__/*
+.ipynb_checkpoints/*
+*.ipynb
+*.pdf
