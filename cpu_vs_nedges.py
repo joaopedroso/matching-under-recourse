@@ -1,9 +1,9 @@
 import networkx as nx
-from time import clock
+from time import process_time
 from copy import deepcopy
 import sys
 from configurations import generate_graphs
-from eval_matching import solve
+from solve import solve
 
 try:
     maxsz = int(sys.argv[1])
@@ -22,10 +22,10 @@ for (i,G) in enumerate(generate_graphs(maxsz)):
     for (i,j) in edges:
         p[frozenset({i,j})] = P
     resid = deepcopy(adj)
-    start = clock()
+    start = process_time()
     E,sol,ncache = solve(adj=adj, p=p, resid=resid, N=len(edges), cpulim=start+cpulim)
     # E,sol,ncache = -1,-1,-1
-    cpu = clock() - start
+    cpu = process_time() - start
     print("expectation:\t{}\tCPU used:\t{}\tcache size:{}".format(E,cpu,ncache))
     sys.stdout.flush()
 
@@ -33,5 +33,5 @@ for (i,G) in enumerate(generate_graphs(maxsz)):
     del E
     del sol
     del ncache
-    from eval_matching import CACHE
+    from solve import CACHE
     CACHE.clear()

@@ -1,8 +1,8 @@
 import networkx as nx
-from time import clock
+from time import process_time
 from copy import deepcopy
 from configurations import generate_graphs
-from eval_matching import solve
+from solve import solve
 from enum_matchings import adj_from_edges, to_str
 import sys
 from kep_io import read_prob
@@ -45,10 +45,10 @@ with open("RESULTS/cpu_kep_DB.json","r") as f:
     FAILDB = json.load(f)
 
 if filename not in FAILDB:
-    start = clock()
+    start = process_time()
     resid = deepcopy(adj)
     E,sol,ncache = solve(adj=adj, p=p, resid=resid, N=N, cpulim=start+cpulim)
-    cpu = clock() - start
+    cpu = process_time() - start
 else:
     print("warning: not solving, instance in blacklist")
     E,sol,ncache = None,None,None

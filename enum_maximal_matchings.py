@@ -1,3 +1,7 @@
+# file "enum_maximal_matchings.py"
+# (not used anymore, see enum_matchings)
+
+
 from copy import deepcopy
 
 
