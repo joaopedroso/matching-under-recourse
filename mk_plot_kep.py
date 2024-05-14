@@ -1,33 +1,36 @@
 import sys
-import subprocess
-import os.path
 import numpy as np
 import matplotlib.pyplot as plt
 avg = lambda v : sum(v)/len(v)
 
-if len(sys.argv) != 2:
-    print("usage: python %s filename.csv" % sys.argv[0])
-    exit(0)
-
-filename = sys.argv[1]
-
-Nlist = ["0","1","2","3","inf"]
+filename = "RESULTS/summary_solve_khm.csv"
+# filename = "RESULTS/summary_greedy-k_khm.csv"
+output = None # "cpu_kep.pdf"
+Nlist = ["0","1","2","3","999999"]
+Nlabel = {"0":"1", "1":"2", "2":"3", "3":"4", "999999":r"$\infty$"}
 SIZES = [10,20,30,40,50]
 NSUCCESS = dict(((inst,N),0.) for inst in SIZES for N in Nlist)
 NFAILS = dict(((inst,N),0.) for inst in SIZES for N in Nlist)
 
 import csv
+MISSING = {}
 INST, NEDGES, NVERT, EXPECT, CPU, CACHE = {}, {}, {}, {}, {}, {}
 with open(filename) as csvfile:
     reader = csv.reader(csvfile, delimiter='\t')
     for row in reader:
-        inst,N,nvert,nedges,expect,cpu,ncache,_ = row
+        instname,N,nvert,nedges,expect,cpu,ncache = row
         assert N in Nlist
-        inst = inst[inst.rfind("/")+1:inst.find(".input")]
+        inst = instname[instname.rfind("/")+1:instname.find(".input")]
         seq = int(inst[3:])
         inst = int(inst[:2])
-        nvert = int(nvert)
-        nedges = int(nedges)
+        try:
+            nvert = int(nvert)
+            nedges = int(nedges)
+            MISSING[instname] = nvert, nedges
+        except:
+            # "blacklisted" files, no data in csv
+            nvert, nedges = MISSING[instname]
+
         key = (N,nvert,nedges,seq)
         INST[key] = int(inst)
         if cpu == "None":  # in some legacy experiments...
@@ -40,15 +43,14 @@ with open(filename) as csvfile:
             assert CPU[key] >= 3600
         else:
             NSUCCESS[inst,N] += 1
-            EXPECT[key] = float(expect)
+            EXPECT[key] = float(expect)/2
             CACHE[key] = int(ncache)
     for inst in SIZES:
         for N in Nlist:
             assert NSUCCESS[inst,N] + NFAILS[inst,N] == 50
 
-output = "cpu_kep.pdf"
 title = ["CPU used in terms of the number of vertices", "CPU used in terms of the number of edges"]
-ylabel = ["N = {}".format(N) for N in Nlist]
+ylabel = [f"N = {Nlabel[N]}" for N in Nlist]
 xlabel = ["number of vertices", "number of edges"]
 logy = True
 index = np.arange(len(SIZES))
@@ -77,10 +79,9 @@ for inst in SIZES:
                     else:
                         xx[i,j,inst].append(NEDGES[k])
                     yy[i,j,inst].append(CPU[k])
+
  
- 
-import numpy as np
-import matplotlib.pyplot as plt
+
  
 fig, ax = plt.subplots(len(Nlist), 2, sharex='col', sharey='row', figsize=(10,10))
 plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.03, hspace=0.03)
@@ -93,12 +94,12 @@ for i,N in enumerate(Nlist):
         # ax[i,j].legend(title='Instance sizes',fontsize=8,loc=4)
         for inst in SIZES:
             color = str((50-inst)/50)  # (max(SIZES)+10))
-            label = "{} pairs".format(inst)
+            label = f"{inst} pairs"
             line[inst] = ax[i,j].scatter(x=x[N,j,inst], y=y[N,j,inst], s=60, color=color, alpha=0.5, cmap='gray', label=label)
             # failed cases:
             ax[i,j].scatter(x=xx[N,j,inst], y=yy[N,j,inst], s=50, color=color, marker='.', alpha=0.5, cmap='gray')
  
-        plt.legend(title='Instance sizes', handles=[line[l] for l in sorted(line)], loc=4, fontsize=8)
+        plt.legend(title='Instance sizes', handles=[line[l] for l in sorted(line)], loc=4, fontsize=6)
  
         ax[i,j].set_xlim(xmin=-2)
  
@@ -107,8 +108,8 @@ for i,N in enumerate(Nlist):
             ax[i,j].set_title(title[j], size=7)
         if j == 0:
             ax[i,j].set_ylabel(ylabel[i], size=7)
-        else:
-            ax[i,j].set_xlim(xmax=80)  # !!!!! take care not to miss any solved instance 
+        # else:
+        #     ax[i,j].set_xlim(xmax=80)  # !!!!! take care not to miss any solved instance
         if i == 2-1:
             ax[i,j].set_xlabel(xlabel[j])
         if logy:

@@ -11,7 +11,7 @@ if len(sys.argv) != 2:
 
 filename = sys.argv[1]
 
-Nlist = ["inf"]  ##### ["0","1","2","3","inf"]
+Nlist = [999999]  ##### ["0","1","2","3","999999"]
 NSUCCESS = {}
 NFAILS = {}
 

@@ -1,4 +1,4 @@
-from copy import deepcopy
+import networkx as nx
 
 
 def all_matchings(adj, edges, match):
@@ -36,7 +36,7 @@ def greedy_matching(adj, p, edges, match):
     Parameters:
         * adj: the original graph, as an adjacency dictionary [not modified]
         * p: probability of failure
-        * edges: remaining edges in the graph (initially, all its edges)
+        * edges: remaining edges in the graph (initially, all its edges), sorted by failure probability
         * match: currently being enumerated
 
     Yields:
@@ -51,6 +51,26 @@ def greedy_matching(adj, p, edges, match):
         edges = set(e for e in edges if len(set(e) & edge) == 0)
     print(f"match: {match}, edges: {edges}>>>")
     yield match
+
+
+def greedy_k_matching(adj, p, edges):
+    """
+    Find the greedy matching in graph defined by 'adj', as proposed by Chen XXXX  [unused]
+    Parameters:
+        * adj: the original graph, as an adjacency dictionary [not modified]
+        * p: probability of failure (used as weights for matching)
+        * edges: remaining edges in the graph (initially, all its edges)
+
+    Yields:
+        the greedy matching
+    """
+    # print(f"<<<edges: {edges}")
+    if len(edges) > 0:
+        G = nx.Graph()
+        w_edges = [(i, j, p[frozenset({i,j})]) for (i,j) in edges]
+        G.add_weighted_edges_from(w_edges)
+        # print(f"match: {list(nx.max_weight_matching(G))}, edges: {edges}>>>")
+        yield set(frozenset(e) for e in nx.max_weight_matching(G))
 
 
 def greedy_matchingS(adj, p, edges, match):

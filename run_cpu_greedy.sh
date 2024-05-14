@@ -1,24 +1,27 @@
 #!/usr/bin/env bash
 
-PYTHON=python3.11
-CPUDB=RESULTS/cpu_greedy_DB.json
-if [ -f $CPUDB ]; then
-   echo "File $CPUDB exists; using is to avoid repeating long computations"
-   cat $CPUDB
-else
-   echo "File $CPUDB does not exist, creating empty database of long computations"
-   echo "{}" > $CPUDB
-fi
+# PYTHON=python3.11
+PYTHON=pypy3.10
+DATA="DATA/small"
+RESULTS="RESULTS/greedy-pypy3.10_2024-04-19"
+mkdir -p $RESULTS
+TIMELIM=3600
 
-for N in 0 9999; do
+for N in inf; do
     echo
     echo "N=$N"
     echo
     for sz in 10 20 30 40 50; do
         for r in `seq -f "%02g" 1 50`; do
-            inst="DATA/small/${sz}_${r}.input.gz"
-            echo -n -e "$inst\t$N\t"
-            $PYTHON cpu_greedy.py $inst $N 3600 | tail -1
+            inst="$DATA/${sz}_${r}.input.gz"
+            outf="$RESULTS/solve_${sz}_${r}.txt"
+
+            if [ -f $outf ]; then
+                echo "File $outf exists, not running anew"
+            else
+                echo -n -e "$inst\t$N\t"
+                $PYTHON -u cpu_greedy.py $inst $N $TIMELIM | tee $outf | tail -1
+            fi
         done
     done
 done

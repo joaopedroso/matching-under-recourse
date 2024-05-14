@@ -9,6 +9,7 @@ import random
 CACHE = {}
 CPULIM = 0
 LOG = False
+ind = ""
 
 def del_edge_in_matching(res, edge):
     (orig,dest) = edge
@@ -98,7 +99,7 @@ def __solve(adj, p, resid, N):
     # * N: number of observations allowed
     # cache: dictionary with previously computed matchings
 
-    global CPULIM
+    global CPULIM, ind
 
     if process_time() > CPULIM:
         raise TimeoutError
@@ -136,6 +137,7 @@ def __solve(adj, p, resid, N):
             total_val += max_val
             total_sol.append(solution)
 
+    if LOG: ind = ind[:-1]
     return total_val, total_sol
 
 
