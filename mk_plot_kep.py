@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 avg = lambda v : sum(v)/len(v)
 
 filename = "RESULTS/summary_solve_khm.csv"
-# filename = "RESULTS/summary_greedy-k_khm.csv"
+filename = "RESULTS/summary_greedy-k_khm.csv"
 output = None # "cpu_kep.pdf"
 Nlist = ["0","1","2","3","999999"]
 Nlabel = {"0":"1", "1":"2", "2":"3", "3":"4", "999999":r"$\infty$"}

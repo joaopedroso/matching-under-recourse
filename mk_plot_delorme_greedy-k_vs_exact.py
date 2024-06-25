@@ -8,6 +8,7 @@ avg = lambda v : sum(v)/len(v)
 Nlist = ["0","1","2","3","999999"]
 Nlabel = {"0":"1", "1":"2", "2":"3", "3":"4", "999999":r"$\infty$"}
 SIZES = [100]
+output = "gaps_greedy_delorme.pdf"
 
 filename = "RESULTS/delorme-50_summary_solve.csv"
 NINST = 30
@@ -28,7 +29,7 @@ with open(filename) as csvfile:
         CPU[key] = min(3600, float(cpu))
         NEDGES[key] = int(nedges)
         NVERT[key] = int(nvert)
-        EXPECTo[key] = float(expect)
+        EXPECTo[key] = float(expect) / 2   # !!!! number or edges, not vertices (2024 revision)
 
 filename = "RESULTS/delorme-50_summary_greedy-k.csv"
 NINST = 30
@@ -49,7 +50,7 @@ with open(filename) as csvfile:
         CPU[key] = min(3600, float(cpu))
         NEDGES[key] = int(nedges)
         NVERT[key] = int(nvert)
-        EXPECTg[key] = float(expect)
+        EXPECTg[key] = float(expect) / 2   # !!!! number or edges, not vertices (2024 revision)
 
 # for k in EXPECTo:
 #     print(k,EXPECTo[k])
@@ -85,26 +86,24 @@ for N in Nlist:
 x = list(nedg)
 xs = {N:[] for N in Nlist}   # for scatter plot
 ys = {N:[] for e in nedg for N in Nlist}
+objs,grds,gaps = {N:[] for N in Nlist},{N:[] for N in Nlist},{N:[] for N in Nlist}
 for e in nedg:
-    print(f"-------------------{e}", end="\n")
     for N in Nlist:
         errs = []
         for (n, nvert, nedges, seq) in EXPECTg:
             if n == N and nedges == e:
-                opt = EXPECTo[N, nvert, e, seq]
+                obj = EXPECTo[N, nvert, e, seq]
                 grd = EXPECTg[N, nvert, e, seq]
-                err = 100 * (1 - grd / opt)
+                err = 100 * (1 - grd / obj)
                 xs[N].append(e)
                 ys[N].append(err)
                 errs.append(err)
+                objs[N].append(obj)
+                grds[N].append(grd)
+                gaps[N].append(err)
         y[N].append(avg(errs))
-        print(e,N,ys[N],y[N][-1])
-        print(f"{y[N]}", end="\n")
-    print()
 
 
-
-output = "err_greedy_delorme.pdf"
 title = ["Greedy loss in terms of the number of vertices", "Greedy loss in terms of the number of edges"]
 ylabel = [f"N = {Nlabel[N]}" for N in Nlist]
 xlabel = ["number of vertices", "number of edges"]
@@ -115,9 +114,10 @@ line = {}
 colors = ['#525252', '#88419d', '#2b8cbe', '#d7301f', '#238b45']
 markers = ['1', '2', '3', '4', '.']
 for i,N in enumerate(Nlist):
-    label = f"{Nlabel[N]}"
-    ax.scatter(x=xs[N], y=ys[N], alpha=0.8, color=colors[i], marker = markers[i])
+    label = f"N={Nlabel[N]}"
+    ax.scatter(x=xs[N], y=ys[N], alpha=0.8, color=colors[i], marker = markers[i], s=100, label=label)
     # line[v] = ax.scatter(x=x, y=y[N], s=100, label=label, alpha=0.5, marker = 'x', cmap='gray')
+    label = " "
     ax.plot(x, y[N], alpha=0.7, linewidth=5, color=colors[i], label=label) # , s=100, label=label, alpha=0.5, marker='x', cmap='gray')
     ax.grid(color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
 
@@ -137,9 +137,13 @@ else:
 # write processed output as latex text
 outf = sys.stdout   # open("nnodes.tex", "w")
 outf.write("Delorme 50-node instances\n")
-outf.write("Observations\t& Error")
+outf.write("Observations\t& Exact\t& Greedy\t& Gap(\\%)\t")
 outf.write(r"\\" + "\n")
 for N in Nlist:
-    outf.write(f"N={Nlabel[N]}\t& {avg(y[N])}\t")
+    outf.write(f"N={Nlabel[N]}\t& {avg(objs[N])}\t & {avg(grds[N])}\t & {avg(gaps[N])}\t")
     outf.write(r"\\" + "\n")
 
+# N = Nlist[-1]
+# print(objs[N])
+# print(grds[N])
+# print(gaps[N])

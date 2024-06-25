@@ -7,7 +7,7 @@ import csv
 
 avg = lambda v: sum(v) / len(v)
 
-output = "expect_kep.pdf"
+output = "cpu_kep.pdf"
 Nlist = ["0", "1", "2", "3", "999999"]
 Nlabel = {"0": "1", "1": "2", "2": "3", "3": "4", "999999": r"$\infty$"}
 SIZES = [10, 20, 30, 40, 50]
@@ -19,7 +19,7 @@ filename = "RESULTS/summary_solve_khm.csv"
 MISSINGo = {}
 NSUCCESSo = dict(((inst, N), 0.) for inst in SIZES for N in Nlist)
 NFAILSo = dict(((inst, N), 0.) for inst in SIZES for N in Nlist)
-NEDGESo, NVERTo, EXPECTo, CPUo, CACHEo = {}, {}, {}, {}, {}
+INSTo, NEDGESo, NVERTo, EXPECTo, CPUo, CACHEo = {}, {}, {}, {}, {}, {}
 with open(filename) as csvfile:
     reader = csv.reader(csvfile, delimiter='\t')
     for row in reader:
@@ -35,8 +35,8 @@ with open(filename) as csvfile:
         except:
             # "blacklisted" files, no data in csv
             nvert, nedges = MISSINGo[instname]
-        key = (inst, N, nvert, nedges, seq)
-        assert key not in CPUo
+        key = (N, nvert, nedges, seq)
+        INSTo[key] = int(inst)
         if cpu == "None":  # in some legacy experiments...
             cpu = 3600
         CPUo[key] = min(3600, float(cpu))
@@ -56,13 +56,13 @@ with open(filename) as csvfile:
 xo, yo = {}, {}
 xxo, yyo = {}, {}
 for inst in SIZES:
-    KEYS = [k for k in CPUo if k[0] == inst]
+    KEYS = [k for k in INSTo if INSTo[k] == inst]
     for i in Nlist:
         for j in range(2):
             xo[i, j, inst], yo[i, j, inst] = [], []
             xxo[i, j, inst], yyo[i, j, inst] = [], []  # failed cases
             for k in KEYS:
-                (_inst, _N, _nvert, _nedges, _seq) = k
+                (_N, _nvert, _nedges, _seq) = k
                 if str(_N) != str(i) or _nedges == 0:
                     continue
                 if CPUo[k] < 3600:
@@ -70,28 +70,26 @@ for inst in SIZES:
                         xo[i, j, inst].append(NVERTo[k])
                     else:
                         xo[i, j, inst].append(NEDGESo[k])
-                    # y[i,j,inst].append(CPU[k])
-                    yo[i, j, inst].append(EXPECTo[k])
+                    yo[i, j, inst].append(CPUo[k])
                 else:  # failed cases
                     if j == 0:
                         xxo[i, j, inst].append(NVERTo[k])
                     else:
                         xxo[i, j, inst].append(NEDGESo[k])
-                    # yy[i,j,inst].append(CPU[k])
-                    yyo[i, j, inst].append(-0.25)
+                    yyo[i, j, inst].append(CPUo[k])
 
 
 filename = "RESULTS/summary_greedy-k_khm.csv"
 MISSINGg = {}
 NSUCCESSg = dict(((inst, N), 0.) for inst in SIZES for N in Nlist)
 NFAILSg = dict(((inst, N), 0.) for inst in SIZES for N in Nlist)
-INSTg, NEDGESg, NVERTg, EXPECTg, CPUg, CACHEg = {}, {}, {}, {}, {}, {}
+INSTg, NEDGESg, NVERTg, EXPECTg, CPUg, CACHEo = {}, {}, {}, {}, {}, {}
 with open(filename) as csvfile:
     reader = csv.reader(csvfile, delimiter='\t')
     for row in reader:
-        instname,N,nvert,nedges,expect,cpu,ncache = row
+        instname, N, nvert, nedges, expect, cpu, ncache = row
         assert N in Nlist
-        inst = instname[instname.rfind("/")+1:instname.find(".input")]
+        inst = instname[instname.rfind("/") + 1:instname.find(".input")]
         seq = int(inst[3:])
         inst = int(inst[:2])
         try:
@@ -101,8 +99,8 @@ with open(filename) as csvfile:
         except:
             # "blacklisted" files, no data in csv
             nvert, nedges = MISSINGg[instname]
-        key = (inst, N, nvert, nedges, seq)
-        assert key not in CPUg
+        key = (N, nvert, nedges, seq)
+        INSTg[key] = int(inst)
         if cpu == "None":  # in some legacy experiments...
             cpu = 3600
         CPUg[key] = min(3600, float(cpu))
@@ -114,7 +112,7 @@ with open(filename) as csvfile:
         else:
             NSUCCESSg[inst, N] += 1
             EXPECTg[key] = float(expect) / 2   # !!!! number or edges, not vertices (2024 revision)
-            CACHEg[key] = int(ncache)
+            CACHEo[key] = int(ncache)
     for inst in SIZES:
         for N in Nlist:
             assert NSUCCESSg[inst, N] + NFAILSg[inst, N] == 50
@@ -122,13 +120,13 @@ with open(filename) as csvfile:
 xg, yg = {}, {}
 xxg, yyg = {}, {}
 for inst in SIZES:
-    KEYS = [k for k in CPUg if k[0] == inst]
+    KEYS = [k for k in INSTg if INSTg[k] == inst]
     for i in Nlist:
         for j in range(2):
             xg[i, j, inst], yg[i, j, inst] = [], []
             xxg[i, j, inst], yyg[i, j, inst] = [], []  # failed cases
             for k in KEYS:
-                (_inst, _N, _nvert, _nedges, _seq) = k
+                (_N, _nvert, _nedges, _seq) = k
                 if str(_N) != str(i) or _nedges == 0:
                     continue
                 if CPUg[k] < 3600:
@@ -136,25 +134,23 @@ for inst in SIZES:
                         xg[i, j, inst].append(NVERTg[k])
                     else:
                         xg[i, j, inst].append(NEDGESg[k])
-                    # y[i,j,inst].append(CPU[k])
-                    yg[i, j, inst].append(EXPECTg[k])
+                    yg[i, j, inst].append(CPUg[k])
                 else:  # failed cases
                     if j == 0:
                         xxg[i, j, inst].append(NVERTg[k])
                     else:
                         xxg[i, j, inst].append(NEDGESg[k])
-                    # yy[i,j,inst].append(CPU[k])
-                    yyg[i, j, inst].append(-0.25)
+                    yyg[i, j, inst].append(CPUg[k])
 
 
 
 #
 # read data for greedy solution, fill variables for plotting
 #
-title = ["Expectation in terms of the number of vertices", "Expectation in terms of the number of edges"]
+title = ["CPU used in terms of the number of vertices", "CPU used in terms of the number of edges"]
 ylabel = [f"N = {Nlabel[N]}" for N in Nlist]
 xlabel = ["number of vertices", "number of edges"]
-logy = False
+logy = True
 fig, ax = plt.subplots(len(Nlist), 2, sharex='col', sharey='row', figsize=(10, 10))
 plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.03, hspace=0.03)
 
@@ -163,8 +159,6 @@ colors = ['#525252', '#88419d', '#2b8cbe', '#d7301f', '#238b45']
 for i, N in enumerate(Nlist):
     for j in range(2):
         ax[i, j].grid(True)
-        # ax[i, j].set_yscale("log")
-        # ax[i,j].legend(title='Instance sizes',fontsize=8,loc=4)
         for inst in SIZES:
             alpha = .15 + .75 * inst / 50  # (max(SIZES)+10))
             label = f"{inst} pairs"
@@ -183,11 +177,9 @@ for i, N in enumerate(Nlist):
             ax[i, j].scatter(x=xxg[N, j, inst], y=yyg[N, j, inst], marker='+', s=15,
                              color=colors[1], alpha=alpha, label='(greedy-k)')
 
-        plt.legend(title='Instance sizes', handles=[line[l] for l in sorted(line)],
-                   ncol=2, loc='center right', fontsize=6)
+        plt.legend(title='Instance sizes', handles=[line[l] for l in sorted(line)], loc=4, fontsize=6, ncol=2)
 
         ax[i, j].set_xlim(xmin=-2)
-        ax[i, j].set_ylim(ymax=3.5)
 
         ax[i, j].grid(color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
         if i == 0:
@@ -217,46 +209,15 @@ else:
 
 # write processed output as latex text
 outf = sys.stdout  # open("nnodes.tex", "w")
-outf.write("instances solved\n")
 outf.write("Instances")
 for N in Nlist:
-    outf.write(" & \\multicolumn{3}{c}{N=%s}" % Nlabel[N])
+    outf.write("\t& \\multicolumn{2}{c}{N=%s}" % Nlabel[N])
 outf.write(r" \\" + "\n")
-for inst in SIZES:
-    KEYS = [k for k in CPUo if k[0] == inst]
-    outf.write(("%s pairs ") % (inst))
+for inst in SIZES:  # 10 20 ... 50
+    outf.write(("%s pairs" * 1) % (inst))
     for N in Nlist:
-        outf.write(' & %2d' % len([EXPECTo[k] for k in KEYS if k[1] == N and CPUo[k]<3600 and NEDGESo[k]>0]))
-        outf.write(' & %8g' % avg([EXPECTo[k] for k in KEYS if k[1] == N and CPUo[k]<3600 and NEDGESo[k]>0]))
-        outf.write(' & %8g' % avg([EXPECTg[k] for k in KEYS if k[1] == N and CPUo[k]<3600 and NEDGESo[k]>0]))
-    outf.write(r" \\" + "\n")
-outf.write("total")
-for N in Nlist:
-    outf.write(' & %2d' % len([EXPECTo[k] for k in EXPECTo if k[1] == N and CPUo[k]<3600 and NEDGESo[k]>0]))
-    outf.write(' & %8g' % avg([EXPECTo[k] for k in EXPECTo if k[1] == N and CPUo[k]<3600 and NEDGESo[k]>0]))
-    outf.write(' & %8g' % avg([EXPECTg[k] for k in EXPECTo if k[1] == N and CPUo[k]<3600 and NEDGESo[k]>0]))
-outf.write(r" \\" + "\n")
-
-outf.write("\ninstances solved for all Ns\n")
-outf.write("Instances & Number")
-for N in Nlist:
-    outf.write(" & \\multicolumn{2}{c}{N=%s}" % Nlabel[N])
-outf.write(r" \\" + "\n")
-for inst in SIZES:
-    KEYS = [k for k in CPUo if k[0] == inst]
-    SEQS = list((set(k[-1] for k in KEYS if k[1] == Nlist[-1] and CPUo[k]<3600 and NEDGESo[k]>0)))
-    outf.write((f"{inst} pairs & {len(SEQS):2}"))
-    for N in Nlist:
-        outf.write(' & %8g' % avg([EXPECTo[k] for k in KEYS if k[1] == N and k[-1] in SEQS]))
-        outf.write(' & %8g' % avg([EXPECTg[k] for k in KEYS if k[1] == N and k[-1] in SEQS]))
+        outf.write('\t& %5g' % NSUCCESSo[inst, N])
+        outf.write('\t& %5g' % NSUCCESSg[inst, N])
     outf.write(r" \\" + "\n")
 
-for N in Nlist[0:1]:
-    for inst in SIZES[0:1]:
-        KEYS = [k for k in CPUo if k[0] == inst]
-        SEQS = list((set(k[-1] for k in KEYS if k[1] == Nlist[-1] and NEDGESo[k] <= 0)))
-        print(0, len(SEQS), SEQS)
-        SEQS = list((set(k[-1] for k in KEYS if k[1] == Nlist[-1] and CPUo[k] < 3600 and NEDGESo[k] > 0)))
-        print("X", len(SEQS), SEQS)
-        print(N, inst, NSUCCESSo[inst, N], NFAILSo[inst, N], len([k for k in KEYS if k[-1] in SEQS]))
-        assert NSUCCESSo[inst, N] + NFAILSo[inst, N] == 50
+

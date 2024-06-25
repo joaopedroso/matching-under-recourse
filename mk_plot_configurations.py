@@ -5,15 +5,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 avg = lambda v : sum(v)/len(v)
 
-if len(sys.argv) != 2:
-    print("usage: python %s filename.csv" % sys.argv[0])
+try:
+    filename = sys.argv[1]
+except:
+    print("usage: python %s filename.csv [output.pdf]" % sys.argv[0])
     exit(0)
 
-filename = sys.argv[1]
-
-Nlist = [999999]  ##### ["0","1","2","3","999999"]
-NSUCCESS = {}
-NFAILS = {}
+# output = "cpu_graphs.pdf"
+try:
+    output = sys.argv[2]
+except:
+    output = None
 
 avg = lambda x: sum(x)/len(x)
 
@@ -44,8 +46,6 @@ with open(filename) as csvfile:
         # print(key, avg(CPU[key]), avg(CACHE[key]))
 
 VERT = list(sorted(EDGES.keys()))
-output = None
-output = "cpu_graphs.pdf"
 title = ["|V| = {}".format(v) for v in VERT]
 ylabel = ["CPU time"]
 # xlabel = ["number of vertices", "number of edges"]
@@ -57,7 +57,7 @@ fig, ax = plt.subplots(1, 1, sharex='col', sharey='row', figsize=(5,5))
 # plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.03, hspace=0.03)
 
 # ax[j].set_title(title[j], size=8)
-ax.set_ylim(ymin=1.e-4, ymax=10000)
+ax.set_ylim(ymin=1.e-3, ymax=10000)
 ax.grid(True)
 ax.set_yscale("log")
 
@@ -108,19 +108,3 @@ if output:
     plt.savefig(output)
 else:
     plt.show()
-
-exit(0)
-
-# write processed output as latex text
-outf = sys.stdout   # open("nnodes.tex", "w")
-outf.write("Instances\t&")
-for N in Nlist:
-    outf.write("\t& \multicolumn{1}{c}{N=%s}" % N)
-outf.write(r" \\" + "\n")
-for inst in SIZES: # 10 20 ... 50
-    outf.write( ("%s pairs\t& "*1) % (inst))
-    for N in Nlist:
-        outf.write('\t& %g' % NSUCCESS[inst,N])
-    outf.write(r" \\" + "\n")                
-
-

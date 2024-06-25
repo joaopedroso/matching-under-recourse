@@ -8,7 +8,7 @@ import random
 # globals
 CACHE = {}
 CPULIM = 0
-LOG = False
+LOG = True
 ind = ""
 
 def del_edge_in_matching(res, edge):
@@ -101,6 +101,8 @@ def __solve(adj, p, resid, N):
 
     global CPULIM, ind
 
+    if LOG: ind += "  "
+
     if process_time() > CPULIM:
         raise TimeoutError
 
@@ -112,7 +114,7 @@ def __solve(adj, p, resid, N):
     total_val = 0
     total_sol = []
     for c in components:
-        if len(c) == 1:
+        if len(c) == 1:   # only one edge in this component
             continue
 
         sG = nx.subgraph(G, c)
@@ -123,7 +125,7 @@ def __solve(adj, p, resid, N):
 
         max_val = -1
         for mi in all_matchings(adj=adj, edges=edges_0, match=set()):
-            if LOG: print(ind+"matching:", to_str(mi))
+            if LOG: print(ind+"matching:...", to_str(mi))
             if process_time() > CPULIM:
                 raise TimeoutError
             m_matching = mi.copy()
@@ -132,12 +134,12 @@ def __solve(adj, p, resid, N):
             if m_sol.expect > max_val:
                 max_val = m_sol.expect
                 solution = deepcopy(m_sol)
-            if LOG: print(ind+"matching:", to_str(mi), "expectation", m_sol.expect)
+            if LOG: print(ind+"...matching:", to_str(mi), "expectation", m_sol.expect)
         if max_val > 0:
             total_val += max_val
             total_sol.append(solution)
 
-    if LOG: ind = ind[:-1]
+    if LOG: ind = ind[:-2]
     return total_val, total_sol
 
 
@@ -161,9 +163,9 @@ def solve(adj, p, resid, N, cpulim, init=True):
 
 
 if __name__ == "__main__":
-    N = 100   # number of observations allowed
+    N = 1   # number of observations allowed
     # adj = {1:{2,4}, 2:{1,3}, 3:{2,4}, 4:{1,3}}   # C4
-    # adj = {1:{2,3,4}, 2:{1,3}, 3:{1,2}, 4:{1}}   #K4
+    # adj = {1:{2,3,4}, 2:{1,3}, 3:{1,2}, 4:{1}}   # K4
     # edges = edges_from_adj(adj)
     # p = {}
     # P = 0.5
@@ -174,12 +176,12 @@ if __name__ == "__main__":
     #      frozenset({1, 3}): .3,
     #      frozenset({1, 4}): .4,
     #      }
-    adj = {1:{2,4}, 2:{1,3}, 3:{2,4}, 4:{1,3}}   #
+    adj = {1:{2,4}, 2:{1,3}, 3:{2,4}, 4:{1,3}}   # C4
     edges = edges_from_adj(adj)
-    p = {frozenset({1, 2}): 0.1,   # probabilities of edge failure
-         frozenset({1, 4}): 0.2,
-         frozenset({2, 3}): 0.3,
-         frozenset({3, 4}): 0.9,
+    p = {frozenset({1, 2}): 0.01,   # probabilities of edge failure
+         frozenset({1, 4}): 0.02,
+         frozenset({2, 3}): 0.03,
+         frozenset({3, 4}): 0.99,
          }
 
     print("sample usage:")
