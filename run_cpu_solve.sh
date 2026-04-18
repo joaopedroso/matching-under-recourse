@@ -7,7 +7,7 @@ RESULTS="RESULTS/solve-pypy3.10_2024-05-08_khai"
 mkdir -p $RESULTS
 FAILED=""
 TIMELIM=3600
-INF=999999
+INF=inf
 
 # # for N in 0 1 2 3 $INF; do
 # for N in $INF; do

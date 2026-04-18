@@ -125,8 +125,7 @@ def greedy(adj, p, resid, N, cpulim, init=True):
 
 
 if __name__ == "__main__":
-    N = 999999 # number of observations allowed
-    # N cannot be infinity, as that would break the CACHE on N and N-1
+    N = float('inf')  # unlimited observations
     # adj = {1:{2,4}, 2:{1,3}, 3:{2,4}, 4:{1,3}}   # C4
     # adj = {1:{2,3,4}, 2:{1,3}, 3:{1,2}, 4:{1}}   # K4
     # edges = edges_from_adj(adj)

@@ -7,7 +7,7 @@ from kep_io import read_prob, get_kep_edges
 
 try:
     filename = sys.argv[1]
-    N = int(sys.argv[2])
+    N = float('inf') if sys.argv[2] == 'inf' else int(sys.argv[2])
     cpulim = float(sys.argv[3])
 except:
     print("usage: {} KEPinstance Nobserv CPUlim".format(sys.argv[0]))
