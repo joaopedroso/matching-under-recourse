@@ -22,10 +22,13 @@ resid = deepcopy(adj)
 E,sol,ncache = greedy_k(adj=adj, p=p, resid=resid, N=N, cpulim=start+cpulim)
 cpu = process_time() - start
 
+# if sol != None:
+#     print("solution:")
+#     for s in sol:
+#         print(s)
+# else:
+#     print("no solution found")
 print("nvert:\tnedges:\texpectation:\tCPU used:\tcache size:\tedges:")
-# print("solution:")
-# for s in sol:
-#     print(s)
 print("{}\t{}\t".format(len(adj),len(edges)),end="");
 print("{}\t{}\t{}\t{}".format(E,cpu,ncache,to_str(edges)))
 sys.stdout.flush()

@@ -3,14 +3,13 @@
 # PYTHON=python3.11
 PYTHON=pypy3.10
 DATA="DATA/small"
-RESULTS="RESULTS/greedy-k_pypy3.10_2024-05-10_khn"
+RESULTS="RESULTS/greedy-k_pypy3.10_2025-01-13_khn"
 mkdir -p $RESULTS
 FAILED=""
 TIMELIM=3600
 INF=999999
 
-#for N in 0 1 2 3 $INF; do
-for N in $INF; do
+for N in 0 1 2 3 $INF; do
    echo
    echo "N=$N"
    echo
@@ -42,6 +41,7 @@ for N in $INF; do
 done
 
 #DATA="DATA/DelormeInstances"
+#RESULTS="RESULTS/greedy-k_pypy3.10_2025-01-13_khame"
 #for N in 0 1 2 3 $INF; do
 #    echo
 #    echo "N=$N"
@@ -50,7 +50,7 @@ done
 #    for sz in 50; do
 #        for r in `seq -f "%g" 0 29`; do
 #            idx="${sz}_${r}"
-#            inst="$DATA/DelormeInstances_${idx}.input"
+#            inst="$DATA/DelormeInstances_${idx}.input.gz"
 #            outf="$RESULTS/greedy-k_delorme_${N}_${idx}.txt"
 #
 #            if [ -f $outf ]; then

@@ -17,8 +17,8 @@ SIZES = [10, 20, 30, 40, 50]
 #
 filename = "RESULTS/summary_solve_khm.csv"
 MISSINGo = {}
-NSUCCESSo = dict(((inst, N), 0.) for inst in SIZES for N in Nlist)
-NFAILSo = dict(((inst, N), 0.) for inst in SIZES for N in Nlist)
+NSUCCESSo = dict(((inst, N), 0) for inst in SIZES for N in Nlist)
+NFAILSo = dict(((inst, N), 0) for inst in SIZES for N in Nlist)
 NEDGESo, NVERTo, EXPECTo, CPUo, CACHEo = {}, {}, {}, {}, {}
 with open(filename) as csvfile:
     reader = csv.reader(csvfile, delimiter='\t')
@@ -83,8 +83,8 @@ for inst in SIZES:
 
 filename = "RESULTS/summary_greedy-k_khm.csv"
 MISSINGg = {}
-NSUCCESSg = dict(((inst, N), 0.) for inst in SIZES for N in Nlist)
-NFAILSg = dict(((inst, N), 0.) for inst in SIZES for N in Nlist)
+NSUCCESSg = dict(((inst, N), 0) for inst in SIZES for N in Nlist)
+NFAILSg = dict(((inst, N), 0) for inst in SIZES for N in Nlist)
 INSTg, NEDGESg, NVERTg, EXPECTg, CPUg, CACHEg = {}, {}, {}, {}, {}, {}
 with open(filename) as csvfile:
     reader = csv.reader(csvfile, delimiter='\t')
@@ -166,7 +166,9 @@ for i, N in enumerate(Nlist):
         # ax[i, j].set_yscale("log")
         # ax[i,j].legend(title='Instance sizes',fontsize=8,loc=4)
         for inst in SIZES:
-            alpha = .15 + .75 * inst / 50  # (max(SIZES)+10))
+            # alpha = .15 + .75 * inst / 50  # (max(SIZES)+10))
+            alpha = .6
+
             label = f"{inst} pairs"
 
             # optimal
@@ -237,6 +239,21 @@ for N in Nlist:
     outf.write(' & %8g' % avg([EXPECTg[k] for k in EXPECTo if k[1] == N and CPUo[k]<3600 and NEDGESo[k]>0]))
 outf.write(r" \\" + "\n")
 
+# !!!!!!!!!!!!!!!!!!!!
+outf.write("\ninstances solved for all Ns\n")
+outf.write("Instances & Number")
+for N in Nlist:
+    outf.write(" & \\multicolumn{2}{c}{N=%s}" % Nlabel[N])
+outf.write(r" \\" + "\n")
+for N in Nlist:
+    for inst in SIZES:
+        KEYS = [k for k in CPUo if k[0] == inst]
+        SEQS = list((set(k[-1] for k in KEYS if k[1] == Nlist[-1] and CPUo[k]<3600 and NEDGESo[k]>0)))
+        outf.write(' & %8g' % avg([EXPECTo[k] for k in KEYS if k[1] == N and k[-1] in SEQS]))
+        outf.write(' & %8g' % avg([EXPECTg[k] for k in KEYS if k[1] == N and k[-1] in SEQS]))
+        outf.write(r" \\" + "\n")
+# !!!!!!!!!!!!!!!
+
 outf.write("\ninstances solved for all Ns\n")
 outf.write("Instances & Number")
 for N in Nlist:
@@ -251,6 +268,7 @@ for inst in SIZES:
         outf.write(' & %8g' % avg([EXPECTg[k] for k in KEYS if k[1] == N and k[-1] in SEQS]))
     outf.write(r" \\" + "\n")
 
+outf.write("\ncheck that sum of failures and successes match number of instances\n")
 for N in Nlist[0:1]:
     for inst in SIZES[0:1]:
         KEYS = [k for k in CPUo if k[0] == inst]
@@ -260,3 +278,35 @@ for N in Nlist[0:1]:
         print("X", len(SEQS), SEQS)
         print(N, inst, NSUCCESSo[inst, N], NFAILSo[inst, N], len([k for k in KEYS if k[-1] in SEQS]))
         assert NSUCCESSo[inst, N] + NFAILSo[inst, N] == 50
+
+
+outf.write("\nsome info about gaps\n")
+nzg, zg = {N:0 for N in Nlist}, {N:0 for N in Nlist}
+objs,grds,gaps = {N:[] for N in Nlist},{N:[] for N in Nlist},{N:[] for N in Nlist}
+for N in Nlist:
+    for (inst, n, nvert, nedges, seq) in EXPECTo:
+        key = (inst, n, nvert, nedges, seq)
+        if CPUo[key]>3600 or NEDGESo[key]==0:
+            continue
+        if n == N :
+            obj = EXPECTo[key]
+            grd = EXPECTg[key]
+            print(f"{key}\t{obj}\t{grd}")
+            err = 100 * (1 - grd / obj)
+            err = err if err > 1.e-12 else 0
+            objs[N].append(obj)
+            grds[N].append(grd)
+            gaps[N].append(err)
+            if err > 1.e-12:
+                nzg[N] += 1
+            else:
+                zg[N] += 1
+
+# write processed output as latex text
+outf = sys.stdout   # open("nnodes.tex", "w")
+outf.write("Gaps for Xenia's instances\n")
+outf.write("Observations\t& \\#\t& Exact\t& Greedy\t& Mean Gap(\\%)\t& Max Gap(\\%)\t& Non-zero Gaps\t")
+outf.write(r"\\" + "\n")
+for N in Nlist:
+    outf.write(f"N={Nlabel[N]}\t& {nzg[N]+zg[N]}\t& {avg(objs[N])}\t & {avg(grds[N])}\t & {avg(gaps[N])}\t & {max(gaps[N])}\t & {nzg[N]}/{zg[N]}\t")
+    outf.write(r"\\" + "\n")

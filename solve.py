@@ -8,7 +8,7 @@ import random
 # globals
 CACHE = {}
 CPULIM = 0
-LOG = True
+LOG = False
 ind = ""
 
 def del_edge_in_matching(res, edge):
@@ -182,6 +182,13 @@ if __name__ == "__main__":
          frozenset({1, 4}): 0.02,
          frozenset({2, 3}): 0.03,
          frozenset({3, 4}): 0.99,
+         }
+    N = 0
+    adj = {2:{9}, 3:{8}, 6:{8}, 8:{3,6}, 9:{2}}
+    edges = edges_from_adj(adj)
+    p = {frozenset({2, 9}): 0.9973280978579215,   # probabilities of edge failure
+         frozenset({3, 8}): 0.9922058829960843,
+         frozenset({6, 8}): 0.9902156637534143,
          }
 
     print("sample usage:")

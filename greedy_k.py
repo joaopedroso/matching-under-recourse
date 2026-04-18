@@ -123,13 +123,22 @@ if __name__ == "__main__":
     #      frozenset({1, 3}): .3,
     #      frozenset({1, 4}): .4,
     #      }
-    adj = {1:{2,4}, 2:{1,3}, 3:{2,4}, 4:{1,3}}   #
+    adj = {1:{2,4}, 2:{1,3}, 3:{2,4}, 4:{1,3}}   # C4
     edges = edges_from_adj(adj)
     p = {frozenset({1, 2}): 0.1,   # probabilities of edge failure
          frozenset({1, 4}): 0.2,
          frozenset({2, 3}): 0.3,
          frozenset({3, 4}): 0.9,
          }
+
+    N = 0
+    adj = {2:{9}, 3:{8}, 6:{8}, 8:{3,6}, 9:{2}}
+    edges = edges_from_adj(adj)
+    p = {frozenset({2, 9}): 0.9973280978579215,   # probabilities of edge failure
+         frozenset({3, 8}): 0.9922058829960843,
+         frozenset({6, 8}): 0.9902156637534143,
+         }
+
 
     print(f"sample usage, graph={adj}")
     print(p)

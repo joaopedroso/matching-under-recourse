@@ -3,14 +3,17 @@ import subprocess
 import os.path
 import csv
 import matplotlib.pyplot as plt
+
+from mk_plot_kep import output
+
 avg = lambda v : sum(v)/len(v)
 
 Nlist = ["0","1","2","3","999999"]
 Nlabel = {"0":"1", "1":"2", "2":"3", "3":"4", "999999":r"$\infty$"}
-SIZES = [100]
-output = "gaps_greedy_delorme.pdf"
+# output = "gaps_greedy_delorme.pdf"
+output = None
 
-filename = "RESULTS/delorme-50_summary_solve.csv"
+filename = "RESULTS_2024-03-22/delorme-50_summary_solve.csv"
 NINST = 30
 INST, NEDGES, NVERT, EXPECTo, CPU, CACHE = {}, {}, {}, {}, {}, {}
 with open(filename) as csvfile:
@@ -31,7 +34,7 @@ with open(filename) as csvfile:
         NVERT[key] = int(nvert)
         EXPECTo[key] = float(expect) / 2   # !!!! number or edges, not vertices (2024 revision)
 
-filename = "RESULTS/delorme-50_summary_greedy-k.csv"
+filename = "RESULTS_2024-03-22/delorme-50_summary_greedy-k.csv"
 NINST = 30
 INST, NEDGES, NVERT, EXPECTg, CPU, CACHE = {}, {}, {}, {}, {}, {}
 with open(filename) as csvfile:
@@ -80,6 +83,7 @@ for N in Nlist:
 #     print()
 
 x,y = {},{}
+nzg, zg = {N:0 for N in Nlist}, {N:0 for N in Nlist}
 for N in Nlist:
     nedg = sorted(set([nedges for (n, nvert, nedges, seq) in EXPECTo if n == N]))
     y[N] = []
@@ -101,6 +105,10 @@ for e in nedg:
                 objs[N].append(obj)
                 grds[N].append(grd)
                 gaps[N].append(err)
+                if err > 1.e-12:
+                    nzg[N] += 1
+                else:
+                    zg[N] += 1
         y[N].append(avg(errs))
 
 
@@ -121,7 +129,7 @@ for i,N in enumerate(Nlist):
     ax.plot(x, y[N], alpha=0.7, linewidth=5, color=colors[i], label=label) # , s=100, label=label, alpha=0.5, marker='x', cmap='gray')
     ax.grid(color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
 
-ax.set_ylim(ymax=105)
+# ax.set_ylim(ymax=105)
 ax.set_ylabel("Greedy % error", size=10)
 ax.set_xlabel("Number of edges in instance", size=10)
 
@@ -137,10 +145,10 @@ else:
 # write processed output as latex text
 outf = sys.stdout   # open("nnodes.tex", "w")
 outf.write("Delorme 50-node instances\n")
-outf.write("Observations\t& Exact\t& Greedy\t& Gap(\\%)\t")
+outf.write("Observations\t& Exact\t& Greedy\t& Mean Gap(\\%)\t& Max Gap(\\%)\t& Non-zero Gaps\t")
 outf.write(r"\\" + "\n")
 for N in Nlist:
-    outf.write(f"N={Nlabel[N]}\t& {avg(objs[N])}\t & {avg(grds[N])}\t & {avg(gaps[N])}\t")
+    outf.write(f"N={Nlabel[N]}\t& {avg(objs[N])}\t & {avg(grds[N])}\t & {avg(gaps[N])}\t & {max(gaps[N])}\t & {nzg[N]}/{zg[N]}\t")
     outf.write(r"\\" + "\n")
 
 # N = Nlist[-1]

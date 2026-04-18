@@ -160,7 +160,8 @@ for i, N in enumerate(Nlist):
     for j in range(2):
         ax[i, j].grid(True)
         for inst in SIZES:
-            alpha = .15 + .75 * inst / 50  # (max(SIZES)+10))
+            # alpha = .15 + .75 * inst / 50  # (max(SIZES)+10))
+            alpha = .6
             label = f"{inst} pairs"
 
             # optimal

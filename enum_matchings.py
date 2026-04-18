@@ -67,8 +67,11 @@ def greedy_k_matching(adj, p, edges):
     # print(f"<<<edges: {edges}")
     if len(edges) > 0:
         G = nx.Graph()
-        w_edges = [(i, j, p[frozenset({i,j})]) for (i,j) in edges]
+        w_edges = [(i, j, 1-p[frozenset({i,j})]) for (i,j) in edges]   # 1-p -> probability of succeeding (2025-01-10
         G.add_weighted_edges_from(w_edges)
+        # # Print edge weights
+        # for u, v, data in G.edges(data=True):
+        #     print(f"Edge ({u}, {v}) has weight {data['weight']}")
         # print(f"match: {list(nx.max_weight_matching(G))}, edges: {edges}>>>")
         yield set(frozenset(e) for e in nx.max_weight_matching(G))
 
