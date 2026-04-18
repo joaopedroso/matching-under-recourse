@@ -8,8 +8,8 @@ import csv
 avg = lambda v: sum(v) / len(v)
 
 output = "cpu_kep.pdf"
-Nlist = ["0", "1", "2", "3", "999999"]
-Nlabel = {"0": "1", "1": "2", "2": "3", "3": "4", "999999": r"$\infty$"}
+Nlist = ["1", "2", "3", "4", "inf"]
+Nlabel = {"1": "1", "2": "2", "3": "3", "4": "4", "inf": r"$\infty$"}
 SIZES = [10, 20, 30, 40, 50]
 
 #

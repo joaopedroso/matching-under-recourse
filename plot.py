@@ -1,8 +1,6 @@
-from kep_io import read_prob
+from kep_io import read_prob, get_kep_edges
 import sys
-import os 
-
-from enum_matchings import get_kep_edges
+import os
 
 import networkx as nx
 def plot_matching(G,m):
@@ -37,7 +35,7 @@ if __name__ == "__main__":
         exit(-1)
 
     adj, w, p = read_prob(filename)
-    edges = get_kep_edges(adj)
+    edges, _ = get_kep_edges(adj, p)
 
     G = nx.Graph()
     G.add_edges_from(edges)
