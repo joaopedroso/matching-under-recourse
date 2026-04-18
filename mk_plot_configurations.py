@@ -1,3 +1,15 @@
+"""Plot CPU time vs number of edges for small non-isomorphic graphs (Figure 4).
+
+Reads the CSV output of ``cpu_vs_nedges.py`` / ``run_configurations.sh`` and
+plots CPU time (log scale) against number of edges, grouped by number of
+vertices.  Points that exceeded the time limit are shown separately.
+
+Usage::
+
+    python mk_plot_configurations.py <results.csv> [output.pdf]
+
+If no output file is given the plot is shown interactively.
+"""
 import sys
 import subprocess
 import os.path

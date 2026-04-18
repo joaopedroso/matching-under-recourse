@@ -1,3 +1,13 @@
+"""Utility for visualising a KEP graph and a matching using NetworkX/Matplotlib.
+
+When run as a script, reads a KEP instance, extracts 2-cycle edges, finds the
+maximum-weight matching for each connected component, and draws the graph with
+matched edges highlighted.
+
+Usage::
+
+    python plot.py <instance.input[.gz]>
+"""
 from kep_io import read_prob, get_kep_edges
 import sys
 import os

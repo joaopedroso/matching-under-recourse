@@ -1,3 +1,17 @@
+"""Generate Table 4 and the Delorme gap scatter plot (paper Section 5.3).
+
+Reads pre-processed summary CSV files for the exact solver and greedy-k on
+Blom et al. (Delorme) 50-vertex instances, computes per-instance percentage
+gaps, plots them against number of edges, and prints a LaTeX table row for
+each N value.
+
+Input files (relative to working directory)::
+
+    RESULTS_2024-03-22/delorme-50_summary_solve.csv
+    RESULTS_2024-03-22/delorme-50_summary_greedy-k.csv
+
+Run from the repository root after generating and processing Delorme results.
+"""
 import sys
 import subprocess
 import os.path

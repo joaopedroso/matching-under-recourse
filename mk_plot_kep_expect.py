@@ -1,3 +1,22 @@
+"""Generate Figure 5 of the paper: expected matched edges vs instance size.
+
+Reads pre-processed summary CSV files for the exact solver and the greedy-k
+heuristic (one row per instance per N value), then plots expected matched edges
+against number of vertices and number of edges, with one subplot row per N.
+Also prints LaTeX table rows for Tables 2 and 3 and gap statistics to stdout.
+
+Input files (relative to working directory)::
+
+    RESULTS/summary_solve_khm.csv    — exact solver results
+    RESULTS/summary_greedy-k_khm.csv — greedy-k results
+
+Output::
+
+    expect_kep.pdf    — Figure 5
+    stdout            — LaTeX table fragments for Tables 2–3
+
+Run from the repository root after generating and processing experiment results.
+"""
 import sys
 import subprocess
 import os.path

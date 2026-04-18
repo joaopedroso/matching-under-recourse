@@ -1,3 +1,25 @@
+"""CLI driver: run the exact solver on a single KEP instance.
+
+Usage::
+
+    python cpu_solve.py <instance.input[.gz]> <N> <CPUlim>
+
+Arguments
+---------
+instance.input[.gz]
+    KEP instance file (Klimentova et al. format).  The corresponding
+    ``.prob`` file must exist in the same directory.
+N
+    Maximum number of observation rounds (integer, or 'inf' for unlimited).
+CPUlim
+    CPU time limit in seconds (float).
+
+Output (tab-separated, one line)::
+
+    nvert  nedges  expectation  CPU_used  cache_size  edges
+
+A timeout produces ``None`` for expectation and cache_size.
+"""
 from time import process_time
 from copy import deepcopy
 from solve import solve

@@ -1,3 +1,22 @@
+"""Generate Figure 6 of the paper: CPU time vs instance size.
+
+Reads pre-processed summary CSV files for the exact solver and the greedy-k
+heuristic, then plots CPU time (log scale) against number of vertices and
+number of edges, with one subplot row per N value.
+Also prints a LaTeX table of solved-instance counts (Table 1) to stdout.
+
+Input files (relative to working directory)::
+
+    RESULTS/summary_solve_khm.csv    — exact solver results
+    RESULTS/summary_greedy-k_khm.csv — greedy-k results
+
+Output::
+
+    cpu_kep.pdf    — Figure 6
+    stdout         — LaTeX table fragment for Table 1
+
+Run from the repository root after generating and processing experiment results.
+"""
 import sys
 import subprocess
 import os.path

@@ -1,6 +1,12 @@
-# code for calculating the number of different configurations as a
-# function of the size of a graph
+"""Enumerate all non-isomorphic connected graphs up to a given number of vertices.
 
+Used by ``cpu_vs_nedges.py`` to generate the benchmark set of small graphs
+(Figure 4 of the paper).  Two graphs are considered the same if they are
+isomorphic (checked via NetworkX graph isomorphism).
+
+The enumeration starts from a Hamiltonian path on N vertices and adds edges
+one by one, keeping only graphs not isomorphic to any already seen.
+"""
 
 import sys
 import networkx as nx

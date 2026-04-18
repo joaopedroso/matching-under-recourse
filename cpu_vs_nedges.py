@@ -1,3 +1,21 @@
+"""Benchmark the exact solver across all non-isomorphic graphs up to a given size.
+
+Generates all non-isomorphic connected graphs with up to ``maxsize`` vertices
+(via ``configurations.generate_graphs``), solves each with the exact solver
+using unlimited recourse and zero failure probability (P=0, so every edge
+always succeeds), and reports CPU time and cache size.
+
+Usage::
+
+    python cpu_vs_nedges.py <maxsize> <CPUlim>
+
+Output (tab-separated, one line per graph)::
+
+    graph_index  nvert  nedges  expectation  CPU_used  cache_size
+
+Produces the data for Figure 4 of the paper (CPU time vs number of edges
+for small graphs).
+"""
 import networkx as nx
 from time import process_time
 from copy import deepcopy

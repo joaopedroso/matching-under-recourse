@@ -1,3 +1,12 @@
+"""Plot CPU time for a single solver (exact or greedy-k) vs instance size.
+
+Similar to mk_plot_kep_cpu.py but reads a single summary CSV and is intended
+for exploratory analysis.  The filename to read is hard-coded at the top of
+the script; switch between exact and greedy-k by editing the ``filename``
+variable.
+
+Run from the repository root after generating and processing experiment results.
+"""
 import sys
 import numpy as np
 import matplotlib.pyplot as plt

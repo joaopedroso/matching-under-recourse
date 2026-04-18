@@ -1,3 +1,22 @@
+"""Convert Blom et al. (Delorme) KEP instance files to Klimentova et al. format.
+
+Blom et al. instances use a plain-text format where each line encodes one arc
+as ``(X, Y), A, B``.  This script converts such files to the ``.input``
+format expected by ``kep_io.read_kep`` and also generates a ``.prob`` file
+with random failure probabilities.
+
+Usage::
+
+    python delorme2kep.py <filename.txt[.gz]>
+
+Produces ``<filename>.input[.gz]`` and ``<filename>.prob[.gz]``.
+An existing output file is never overwritten.
+
+Reference
+---------
+Blom, Hojny & Smeulders, "Cutting Plane Approaches for the Robust Kidney
+Exchange Problem", 2022.
+"""
 import gzip
 import re
 import random
