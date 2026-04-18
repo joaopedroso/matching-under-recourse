@@ -16,7 +16,7 @@
 set -euo pipefail
 
 TYPE="${TYPE:-greedy-k}"
-RESULTS="${RESULTS:-RESULTS/greedy-k_pypy3.10_2025-01-13_khn}"
+RESULTS="${RESULTS:-RESULTS/greedy-k_pypy3.10_<date>_<host>}"
 INF=inf
 
 for N in 1 2 3 4 $INF; do

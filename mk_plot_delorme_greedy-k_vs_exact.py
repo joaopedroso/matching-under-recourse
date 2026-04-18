@@ -27,7 +27,7 @@ Nlabel = {"1": "1", "2": "2", "3": "3", "4": "4", "inf": r"$\infty$"}
 # output = "gaps_greedy_delorme.pdf"
 output = None
 
-filename = "RESULTS_2024-03-22/delorme-50_summary_solve.csv"
+filename = "RESULTS_EJOR/2024-03-22/delorme-50_summary_solve.csv"
 NINST = 30
 INST, NEDGES, NVERT, EXPECTo, CPU, CACHE = {}, {}, {}, {}, {}, {}
 with open(filename) as csvfile:
@@ -48,7 +48,7 @@ with open(filename) as csvfile:
         NVERT[key] = int(nvert)
         EXPECTo[key] = float(expect) / 2   # !!!! number or edges, not vertices (2024 revision)
 
-filename = "RESULTS_2024-03-22/delorme-50_summary_greedy-k.csv"
+filename = "RESULTS_EJOR/2024-03-22/delorme-50_summary_greedy-k.csv"
 NINST = 30
 INST, NEDGES, NVERT, EXPECTg, CPU, CACHE = {}, {}, {}, {}, {}, {}
 with open(filename) as csvfile:

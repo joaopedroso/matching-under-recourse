@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 avg = lambda v : sum(v)/len(v)
 
 filename = "RESULTS/summary_solve_khm.csv"
-filename = "RESULTS/summary_greedy-k_khm.csv"
+filename = "RESULTS_EJOR/2025-01-13/summary_greedy-k_khm.csv"
 output = None # "cpu_kep.pdf"
 Nlist = ["1", "2", "3", "4", "inf"]
 Nlabel = {"1": "1", "2": "2", "3": "3", "4": "4", "inf": r"$\infty$"}
