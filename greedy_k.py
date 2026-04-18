@@ -1,5 +1,24 @@
-# !!!!! new, 2024-04-01
+"""Greedy-k heuristic for maximum-expectation matching under recourse (Algorithm 2).
 
+At each observation round the algorithm selects a single matching using
+NetworkX ``max_weight_matching`` with edge weights equal to the probability
+of survival (1 − p_edge).  This is faster than enumerating all matchings
+(as the exact solver does) while still producing high-quality solutions.
+
+Unlike the exact solver, the greedy-k algorithm considers the full residual
+graph at each round rather than processing connected components independently,
+because a maximum-weight matching may span multiple components and must be
+chosen globally.
+
+The evaluation of expected value for the chosen matching is identical to the
+exact solver (eval_greedy_k mirrors eval_matching from solve.py), including
+memoisation by (N, matching, residual edges).
+
+Reference
+---------
+Pedroso & Ikeda, "Maximum-expectation matching under recourse",
+European Journal of Operational Research, 2025.
+"""
 import networkx as nx
 from copy import deepcopy
 from time import process_time
@@ -15,10 +34,26 @@ ind = ""
 
 
 def eval_greedy_k(adj, p, matching, resid, N):
-    # adj: the original graph, as an adjacency dictionary
-    # matching: matching being evaluated
-    # resid: residual graph (initially, identical to adj) [*: modified]
-    # N: number of observations allowed
+    """Evaluate the expected value of a greedy-k matching (mirrors eval_matching in solve.py).
+
+    Parameters
+    ----------
+    adj : dict
+        Original full graph (adjacency dict); passed to recursive calls.
+    p : dict
+        Edge failure probabilities: p[frozenset({i,j})] in [0, 1].
+    matching : set of frozenset
+        Matching chosen by greedy_k_matching to evaluate.
+    resid : dict
+        Residual graph at the current round.
+    N : int or float
+        Remaining observation rounds.
+
+    Returns
+    -------
+    Solution
+        Solution object with expected value and decision-tree structure.
+    """
     key = N, frozenset(matching), frozenset(edges_from_adj(resid))
     if key in CACHE:
         return CACHE[key]
@@ -50,10 +85,33 @@ def eval_greedy_k(adj, p, matching, resid, N):
 
 
 def __greedy_k(adj, p, resid, N):
-    # adj: the original graph, as an adjacency dictionary [not modified]
-    # * resid: residual graph (initially, identical to adj)  [*: modified]
-    # * N: number of observations allowed
-    # cache: dictionary with previously computed matchings
+    """Select and evaluate the greedy-k matching for the current residual graph.
+
+    Calls greedy_k_matching on the *full* residual graph (not per component),
+    then evaluates the expected value of the resulting matching via
+    eval_greedy_k.
+
+    Parameters
+    ----------
+    adj : dict
+        Original full graph (not modified).
+    p : dict
+        Edge failure probabilities.
+    resid : dict
+        Current residual graph.
+    N : int or float
+        Remaining observation rounds.
+
+    Returns
+    -------
+    total_val : float
+    total_sol : list of Solution
+
+    Raises
+    ------
+    TimeoutError
+        If the CPU time limit (CPULIM) is exceeded.
+    """
 
     global CPULIM
     global ind
@@ -66,7 +124,7 @@ def __greedy_k(adj, p, resid, N):
     if LOG: print(ind+"edges:", to_str(edges_from_adj(resid)), "N=", N)
     total_val = 0
     total_sol = []
-    sG = G   # !!!!! cannot consider connected components independently in the greedy_k case; so using total graph
+    sG = G   # use the full graph: max-weight matching may span multiple components
     edges_0 = list(sG.edges())
     if len(edges_0) > 0:
         adj_0 = nx.to_dict_of_lists(sG)   #,c)
@@ -91,10 +149,29 @@ def __greedy_k(adj, p, resid, N):
 
 
 def greedy_k(adj, p, resid, N, cpulim, init=True):
-    # adj: the original graph, as an adjacency dictionary [not modified]
-    # * resid: residual graph (initially, identical to adj)  [*: modified]
-    # * N: number of observations allowed
-    # cache: dictionary with previously computed matchings
+    """Compute the greedy-k matching strategy (public entry point).
+
+    Parameters
+    ----------
+    adj : dict
+        Compatibility graph as an adjacency dict {vertex: set_of_neighbours}.
+    p : dict
+        Edge failure probabilities: p[frozenset({i,j})] in [0, 1].
+    resid : dict
+        Initial residual graph; pass deepcopy(adj) for a fresh solve.
+    N : int or float
+        Maximum observation rounds.  Use float('inf') for unlimited recourse.
+    cpulim : float
+        Absolute CPU time limit (process_time() scale).
+    init : bool
+        Unused; kept for API compatibility with solve().
+
+    Returns
+    -------
+    E : float or None
+    sol : list of Solution or None
+    ncache : int
+    """
 
     global CACHE
     global CPULIM

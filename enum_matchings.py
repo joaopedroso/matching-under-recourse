@@ -1,3 +1,24 @@
+"""Graph matching primitives used by the exact solver and greedy-k heuristic.
+
+This module provides three matching strategies and graph conversion utilities:
+
+all_matchings
+    Enumerate *all* matchings of a graph by recursive backtracking
+    (Algorithm 3 of the paper).  Used by the exact solver (solve.py) to
+    explore every possible first-round choice.
+
+greedy_matching
+    Return the single greedy matching: pop edges in order of decreasing
+    failure probability (most reliable first) and greedily include each
+    edge if it does not conflict with already-selected edges.
+
+greedy_k_matching
+    Return the single maximum-weight matching computed by NetworkX
+    ``max_weight_matching`` with weights = 1 − p_edge (survival
+    probability).  Used by the greedy-k heuristic (greedy_k.py).
+
+All three functions yield matching(s) as sets of frozensets {i, j}.
+"""
 import networkx as nx
 
 
@@ -31,16 +52,29 @@ def all_matchings(adj, edges, match):
 
 
 def greedy_matching(adj, p, edges, match):
-    """
-    Find the greedy matching in graph defined by 'adj', as proposed by Chen XXXX
-    Parameters:
-        * adj: the original graph, as an adjacency dictionary [not modified]
-        * p: probability of failure
-        * edges: remaining edges in the graph (initially, all its edges), sorted by failure probability
-        * match: currently being enumerated
+    """Find the single greedy matching: select the most reliable edge first.
 
-    Yields:
-        matchings as they are found
+    Pops edges in order of *decreasing* failure probability (the last element
+    of the sorted list has the highest failure probability, so popping gives
+    the most reliable edge), then greedily adds it to the matching and removes
+    all conflicting edges.  Yields exactly one matching.
+
+    Parameters
+    ----------
+    adj : dict
+        Original graph (not used directly; present for API consistency).
+    p : dict
+        Edge failure probabilities: p[frozenset({i,j})] in [0, 1].
+    edges : list
+        Remaining candidate edges, sorted so that edges.pop() returns the
+        edge with the *lowest* failure probability (most reliable).
+    match : set
+        Edges already selected (initially empty).
+
+    Yields
+    ------
+    set of frozenset
+        The single greedy matching.
     """
     if len(edges) > 0:
         edge = frozenset(edges.pop())
@@ -52,15 +86,28 @@ def greedy_matching(adj, p, edges, match):
 
 
 def greedy_k_matching(adj, p, edges):
-    """
-    Find the greedy matching in graph defined by 'adj', as proposed by Chen XXXX  [unused]
-    Parameters:
-        * adj: the original graph, as an adjacency dictionary [not modified]
-        * p: probability of failure (used as weights for matching)
-        * edges: remaining edges in the graph (initially, all its edges)
+    """Find the maximum-weight matching with weights equal to survival probability.
 
-    Yields:
-        the greedy matching
+    Builds a weighted graph where each edge {i,j} has weight 1 − p[{i,j}]
+    (probability of survival), then calls NetworkX ``max_weight_matching``
+    to find the matching that maximises total expected survival weight.
+    Yields exactly one matching.
+
+    This is the core selection step of Algorithm 2 (greedy-k) in the paper.
+
+    Parameters
+    ----------
+    adj : dict
+        Original graph (not used directly; present for API consistency).
+    p : dict
+        Edge failure probabilities: p[frozenset({i,j})] in [0, 1].
+    edges : list of (int, int)
+        All edges of the current residual graph.
+
+    Yields
+    ------
+    set of frozenset
+        The single maximum-weight matching.
     """
     # print(f"<<<edges: {edges}")
     if len(edges) > 0:
@@ -73,40 +120,6 @@ def greedy_k_matching(adj, p, edges):
         # print(f"match: {list(nx.max_weight_matching(G))}, edges: {edges}>>>")
         yield set(frozenset(e) for e in nx.max_weight_matching(G))
 
-
-def greedy_matchingS(adj, p, edges, match):
-    """
-    Find the greedy matching in graph defined by 'adj', as proposed by Chen XXXX  [unused]
-    Parameters:
-        * adj: the original graph, as an adjacency dictionary [not modified]
-        * p: probability of failure
-        * edges: remaining edges in the graph (initially, all its edges)
-        * match: currently being enumerated
-
-    Yields:
-        matchings as they are found
-    """
-    # print(f"match: {match}, edges: {edges}")
-    if len(edges) > 0:
-        assert list(edges) == list(sorted(edges, key=lambda e: -p[frozenset(e)]))
-        edge = frozenset(edges.pop())
-
-        # add edge to the matching
-        m_add = match.copy()
-        m_add.add(edge)
-        e_add = set(e for e in edges if len(set(e) & edge) == 0)
-        if len(e_add) == 0:   # only maximal matchings considered
-            # print(f"yielding match: {m_add}, edges: {e_add}")
-            yield m_add
-
-        if len(e_add) > 0:
-            for m in greedy_matching(adj, p, e_add, m_add):
-                yield m
-
-        # do NOT add (i,j) to the matching
-        if len(edges) > 0:
-            for m in greedy_matching(adj, p, edges, match):
-                yield m
 
 
 def edges_from_adj(adj):

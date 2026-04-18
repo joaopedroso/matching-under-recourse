@@ -1,3 +1,45 @@
+"""Exact solver for maximum-expectation matching under recourse (Algorithm 4).
+
+Problem
+-------
+Given an undirected compatibility graph whose edges may each fail
+independently with a known probability, compute the matching strategy that
+maximises the expected number of successfully matched pairs after at most N
+rounds of observation and re-matching (the *limited recourse* model,
+Section 4 of the paper).
+
+Algorithm
+---------
+The solver works recursively on the residual graph (the subgraph of edges
+that have not yet been matched and observed):
+
+1. Decompose the residual graph into connected components; handle each
+   component independently.
+2. For each component, enumerate every candidate matching M using
+   ``enum_matchings.all_matchings`` (Algorithm 3).
+3. For each M, iterate over all 2^|M| failure patterns (bit-vector seq,
+   where 0 = failed, 1 = survived):
+
+   - Accumulate probability weight prod(p_e^(1−seq_e) · (1−p_e)^seq_e).
+   - Let ON = number of surviving edges.
+   - Build the residual graph after observing the pattern (remove matched
+     edges that survived and matched edges that failed; keep unmatched
+     edges untouched).
+   - If N > 0 and the residual is non-empty, recurse with N−1.
+   - Expected contribution: prod × (2·ON + E_residual).
+
+4. Select the M that maximises the total expected value.
+5. Cache results keyed by (N, frozenset(matching), frozenset(residual
+   edges)) to avoid recomputing identical sub-problems.
+
+The expected value counts *vertices* (not edges): a successfully matched
+edge {i, j} contributes 2 because both donor-patient pairs are served.
+
+Reference
+---------
+Pedroso & Ikeda, "Maximum-expectation matching under recourse",
+European Journal of Operational Research, 2025.
+"""
 import networkx as nx
 from copy import deepcopy
 from time import process_time
@@ -12,6 +54,19 @@ LOG = False
 ind = ""
 
 def del_edge_in_matching(res, edge):
+    """Remove a matched edge that *survived*: delete both endpoints from the residual graph.
+
+    When edge {i, j} is in the matching and both vertices are successfully
+    transplanted, neither i nor j can participate in future rounds.  All
+    adjacency entries referencing i or j are removed.
+
+    Parameters
+    ----------
+    res : dict
+        Residual adjacency dict, modified in place.
+    edge : frozenset
+        The surviving matched edge {i, j}.
+    """
     (orig,dest) = edge
     for i in [orig,dest]:
         for j in res[i]:
@@ -19,13 +74,41 @@ def del_edge_in_matching(res, edge):
         del res[i]
 
 def del_edge_not_in_matching(res, edge):
+    """Remove a matched edge that *failed*: delete only the arc between endpoints.
+
+    When edge {i, j} is in the matching but fails, the vertices i and j
+    remain in the graph (they may still be matched to other partners in a
+    future round), but the arc between them is removed so it is not
+    offered again.
+
+    Parameters
+    ----------
+    res : dict
+        Residual adjacency dict, modified in place.
+    edge : frozenset
+        The failed matched edge {i, j}.
+    """
     (orig,dest) = edge
     res[orig].remove(dest)
     res[dest].remove(orig)
 
 
 class Solution:
-    """hold complete (recursive) solution information"""
+    """Complete (recursive) solution at one node of the decision tree.
+
+    Attributes
+    ----------
+    matching : set of frozenset
+        The matching chosen at this level.
+    expect : float
+        Expected number of matched vertices rooted at this node
+        (includes contributions from all sub-trees).
+    prob : dict
+        Maps each failure pattern (tuple of 0/1) to its probability.
+    pat : dict
+        Maps each failure pattern to the list of Solution objects for the
+        subsequent round (one per connected component of the residual).
+    """
     level = 0
     def __init__(self, matching, expect):
         self.matching = matching    # a level's matching
@@ -59,10 +142,34 @@ class Solution:
 
 
 def eval_matching(adj, p, matching, resid, N):
-    # adj: the original graph, as an adjacency dictionary
-    # matching: matching being evaluated
-    # resid: residual graph (initially, identical to adj) [*: modified]
-    # N: number of observations allowed
+    """Evaluate the expected value of a given matching under the recourse model.
+
+    Iterates over all 2^|matching| failure patterns, computes the probability
+    and immediate reward (surviving edges) of each, then recurses on the
+    residual graph with N−1 rounds remaining.  Results are memoised by
+    (N, matching, residual edges).
+
+    Parameters
+    ----------
+    adj : dict
+        Original full graph (adjacency dict); passed through to recursive calls.
+    p : dict
+        Edge failure probabilities: p[frozenset({i,j})] = probability that
+        edge {i,j} fails.
+    matching : set of frozenset
+        Candidate matching to evaluate.
+    resid : dict
+        Residual graph at the current round (modified in place during
+        enumeration; a deep copy is made per failure pattern).
+    N : int or float
+        Remaining observation rounds.  float('inf') means unlimited recourse.
+
+    Returns
+    -------
+    Solution
+        A Solution object carrying the expected value and the full decision
+        tree rooted at this matching.
+    """
     key = N, frozenset(matching), frozenset(edges_from_adj(resid))
     if key in CACHE:
         return CACHE[key]
@@ -94,10 +201,36 @@ def eval_matching(adj, p, matching, resid, N):
 
 
 def __solve(adj, p, resid, N):
-    # adj: the original graph, as an adjacency dictionary [not modified]
-    # * resid: residual graph (initially, identical to adj)  [*: modified]
-    # * N: number of observations allowed
-    # cache: dictionary with previously computed matchings
+    """Recursively find the optimal matching strategy for the residual graph.
+
+    Decomposes the residual into connected components, then for each component
+    enumerates all candidate matchings and selects the one with maximum
+    expected value (via eval_matching).  Components with a single vertex or
+    no edges are skipped.
+
+    Parameters
+    ----------
+    adj : dict
+        Original full graph (not modified).
+    p : dict
+        Edge failure probabilities.
+    resid : dict
+        Current residual graph (modified by eval_matching sub-calls).
+    N : int or float
+        Remaining observation rounds.
+
+    Returns
+    -------
+    total_val : float
+        Sum of best expected values across all components.
+    total_sol : list of Solution
+        One Solution per component (empty if no matchings exist).
+
+    Raises
+    ------
+    TimeoutError
+        If the CPU time limit (CPULIM) is exceeded.
+    """
 
     global CPULIM, ind
 
@@ -118,7 +251,7 @@ def __solve(adj, p, resid, N):
             continue
 
         sG = nx.subgraph(G, c)
-        edges_0 = list(sG.edges())   # !!!!! 2024-02
+        edges_0 = list(sG.edges())
         if len(edges_0) == 0:
             continue
         adj_0 = nx.to_dict_of_lists(sG,c)
@@ -144,10 +277,39 @@ def __solve(adj, p, resid, N):
 
 
 def solve(adj, p, resid, N, cpulim, init=True):
-    # adj: the original graph, as an adjacency dictionary [not modified]
-    # * resid: residual graph (initially, identical to adj)  [*: modified]
-    # * N: number of observations allowed
-    # cache: dictionary with previously computed matchings
+    """Compute the maximum-expectation matching strategy (public entry point).
+
+    Clears the memoisation cache, sets the CPU limit, then calls the
+    internal solver.  Returns (None, None, cache_size) if the time limit
+    is exceeded before a solution is found.
+
+    Parameters
+    ----------
+    adj : dict
+        Original compatibility graph as an adjacency dict
+        {vertex: set_of_neighbours}.
+    p : dict
+        Edge failure probabilities: p[frozenset({i,j})] in [0, 1].
+    resid : dict
+        Initial residual graph; pass deepcopy(adj) for a fresh solve.
+    N : int or float
+        Maximum number of observation/re-matching rounds.
+        Use float('inf') for unlimited recourse.
+    cpulim : float
+        Absolute CPU time limit in seconds (time.process_time() scale).
+        Pass start + budget, where start = process_time() at call time.
+    init : bool
+        Unused; kept for API compatibility.
+
+    Returns
+    -------
+    E : float or None
+        Expected number of matched vertices, or None on timeout.
+    sol : list of Solution or None
+        Solution tree (one Solution per top-level component), or None.
+    ncache : int
+        Number of entries in the memoisation cache at termination.
+    """
 
     global CACHE
     global CPULIM
