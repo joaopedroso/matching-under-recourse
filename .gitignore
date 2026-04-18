@@ -1,4 +1,5 @@
 HG/
+.venv/
 RESULTS_*
 RESULTS/*
 !RESULTS/.gitkeep

@@ -1,6 +1,0 @@
-# Core dependency (required by all solvers and drivers)
-networkx>=2.6
-
-# Required for plotting scripts only (mk_plot_*.py)
-numpy>=1.20
-matplotlib>=3.4

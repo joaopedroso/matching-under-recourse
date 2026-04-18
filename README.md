@@ -53,11 +53,15 @@ up to N rounds of observation and re-matching (*limited recourse*).
 - [NumPy](https://numpy.org/)
 - [Matplotlib](https://matplotlib.org/)
 
-Install Python dependencies:
+Install Python dependencies (requires [uv](https://docs.astral.sh/uv/)):
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
+
+This creates a `.venv/` virtual environment with all dependencies pinned in
+`uv.lock`.  Activate it with `source .venv/bin/activate`, or prefix commands
+with `uv run`.
 
 ## Benchmark instances
 
