@@ -16,7 +16,7 @@ FAILED=""
 TIMELIM=36000
 INF=inf
 
-for N in 1 2 3 $INF; do
+for N in 1 2 3 4 $INF; do
     echo
     echo "N=$N"
     echo
