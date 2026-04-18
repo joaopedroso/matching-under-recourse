@@ -85,8 +85,8 @@ Results go to `RESULTS/solve-<interpreter>-<date>-<host>/`.
 Process and plot:
 
 ```bash
-# adapt paths in process_output.sh, then:
-bash RESULTS_2024-03-22/process_output.sh > RESULTS/summary_solve_khm.csv
+TYPE=solve RESULTS=RESULTS/solve-<interpreter>-<date>-<host> \
+    bash process_results.sh > RESULTS/summary_solve.csv
 python mk_plot_kep_cpu.py     # Figure 6, Table 1 (stdout)
 python mk_plot_kep_expect.py  # Figure 5, Tables 2–3 (stdout)
 ```
@@ -97,7 +97,12 @@ python mk_plot_kep_expect.py  # Figure 5, Tables 2–3 (stdout)
 bash run_cpu_greedy_k.sh
 ```
 
-Process and plot as above (set `TYPE=greedy-k` in `process_output.sh`).
+```bash
+TYPE=greedy-k RESULTS=RESULTS/greedy-k-<interpreter>-<date>-<host> \
+    bash process_results.sh > RESULTS/summary_greedy-k.csv
+python mk_plot_kep_cpu.py
+python mk_plot_kep_expect.py
+```
 
 ### Table 4 (Delorme instances)
 
