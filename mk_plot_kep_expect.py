@@ -34,7 +34,7 @@ SIZES = [10, 20, 30, 40, 50]
 #
 # read data for exact solution, fill variables for plotting
 #
-filename = "RESULTS_EJOR/2025-01-13/summary_solve_khm.csv"
+filename = "RESULTS_EJOR/summary_solve_khm.csv"
 MISSINGo = {}
 NSUCCESSo = dict(((inst, N), 0) for inst in SIZES for N in Nlist)
 NFAILSo = dict(((inst, N), 0) for inst in SIZES for N in Nlist)
@@ -100,7 +100,7 @@ for inst in SIZES:
                     yyo[i, j, inst].append(-0.25)
 
 
-filename = "RESULTS_EJOR/2025-01-13/summary_greedy-k_khm.csv"
+filename = "RESULTS_EJOR/summary_greedy-k_khm.csv"
 MISSINGg = {}
 NSUCCESSg = dict(((inst, N), 0) for inst in SIZES for N in Nlist)
 NFAILSg = dict(((inst, N), 0) for inst in SIZES for N in Nlist)

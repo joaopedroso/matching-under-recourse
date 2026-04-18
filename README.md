@@ -89,7 +89,7 @@ To reproduce from scratch, run the experiment scripts and process the output:
 ```bash
 bash run_cpu_solve.sh
 TYPE=solve RESULTS=RESULTS/solve-<interpreter>-<date>-<host> \
-    bash process_results.sh > RESULTS_EJOR/2025-01-13/summary_solve_khm.csv
+    bash process_results.sh > RESULTS_EJOR/summary_solve_khm.csv
 python mk_plot_kep_cpu.py     # Figure 6, Table 1 (stdout)
 python mk_plot_kep_expect.py  # Figure 5, Tables 2–3 (stdout)
 ```
@@ -99,7 +99,7 @@ python mk_plot_kep_expect.py  # Figure 5, Tables 2–3 (stdout)
 ```bash
 bash run_cpu_greedy_k.sh
 TYPE=greedy-k RESULTS=RESULTS/greedy-k-<interpreter>-<date>-<host> \
-    bash process_results.sh > RESULTS_EJOR/2025-01-13/summary_greedy-k_khm.csv
+    bash process_results.sh > RESULTS_EJOR/summary_greedy-k_khm.csv
 python mk_plot_kep_cpu.py
 python mk_plot_kep_expect.py
 ```
@@ -151,9 +151,8 @@ failure probabilities, stored in a `.prob` file alongside each `.input` file.
 ## Notes on N encoding
 
 The shell scripts and Python drivers use N directly as in the paper:
-N = 1, 2, 3, 4, inf (unlimited recourse).  The pre-computed result files in
-`RESULTS_EJOR/` were produced with an older internal encoding
-(N = 0, 1, 2, 3, 999999 corresponding to paper N = 1, 2, 3, 4, ∞) and are
-therefore **not** directly compatible with the current plotting scripts.
-To regenerate the summary CSVs in the new encoding, re-run the experiment
-scripts and process with `process_results.sh`.
+N = 1, 2, 3, 4, inf (unlimited recourse).  The pre-computed result files in `RESULTS_EJOR/` were produced with an older
+internal encoding (N = 0, 1, 2, 3, 999999 corresponding to paper N = 1, 2,
+3, 4, ∞) and are therefore **not** directly compatible with the current
+plotting scripts.  To regenerate the summary CSVs in the new encoding,
+re-run the experiment scripts and process with `process_results.sh`.
