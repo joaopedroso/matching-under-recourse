@@ -9,7 +9,7 @@ FAILED=""
 TIMELIM=3600
 INF=inf
 
-for N in 0 1 2 3 $INF; do
+for N in 1 2 3 $INF; do
    echo
    echo "N=$N"
    echo
@@ -42,7 +42,7 @@ done
 
 #DATA="DATA/DelormeInstances"
 #RESULTS="RESULTS/greedy-k_pypy3.10_2025-01-13_khame"
-#for N in 0 1 2 3 $INF; do
+#for N in 1 2 3 $INF; do
 #    echo
 #    echo "N=$N"
 #    echo

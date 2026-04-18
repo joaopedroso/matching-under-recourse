@@ -9,8 +9,7 @@ FAILED=""
 TIMELIM=3600
 INF=inf
 
-# # for N in 0 1 2 3 $INF; do
-# for N in $INF; do
+# for N in 1 2 3 $INF; do
 #     echo
 #     echo "N=$N"
 #     echo
@@ -44,7 +43,7 @@ INF=inf
 #
 #TIMELIM=36000
 #DATA="DATA/DelormeInstances"
-#for N in 0 1 2 3 $INF; do
+#for N in 1 2 3 $INF; do
 #    echo
 #    echo "N=$N"
 #    echo
