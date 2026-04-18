@@ -1,3 +1,4 @@
+import gzip
 import re
 import random
 from kep_io import write_prob

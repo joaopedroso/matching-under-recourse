@@ -42,14 +42,12 @@ def greedy_matching(adj, p, edges, match):
     Yields:
         matchings as they are found
     """
-    print(f"<<<match: {match}, edges: {edges}")
     if len(edges) > 0:
         edge = frozenset(edges.pop())
 
         # add edge to the matching
         match.add(edge)
         edges = set(e for e in edges if len(set(e) & edge) == 0)
-    print(f"match: {match}, edges: {edges}>>>")
     yield match
 
 

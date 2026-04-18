@@ -84,8 +84,6 @@ def __greedy(adj, p, resid, N):
         adj_0 = nx.to_dict_of_lists(sG,c)
 
         max_val = -1
-        print("greedy matching:")
-        print(list(greedy_matching(adj=adj.copy(), p=p, edges=edges_0.copy(), match=set())))
         for mi in greedy_matching(adj=adj, p=p, edges=edges_0, match=set()):
             assert max_val == -1   # consider only one greedy matching
             if LOG: print(ind+"matching:", to_str(mi))
