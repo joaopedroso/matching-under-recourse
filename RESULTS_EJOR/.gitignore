@@ -1,0 +1,9 @@
+# Ignore everything in this directory except the pre-computed result files
+# needed to reproduce the paper's figures and tables.
+*
+!.gitignore
+!summary_solve_khm.csv
+!summary_greedy-k_khm.csv
+!delorme-50_summary_solve.csv
+!delorme-50_summary_greedy-k.csv
+!configurations_pypy3.10_2024-05-08_khn.csv
